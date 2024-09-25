@@ -1,17 +1,18 @@
 import { fail } from "@sveltejs/kit";
+import { todos } from "../../drizzle_schema";
+import { eq } from "drizzle-orm";
 
-export const load = async ({ locals: { supabase, user }}) => {
+export const load = async ({ locals: { db, user }}) => {
     if (!user) {
         throw Error("User is not authenticated");
     }
 
-    const { data: users, error } = await supabase.from("users").select(`id, email, todos ( id, name )`).eq("id", user.id);
-    if (error) throw error;
-    return { users };
+    const fetchedTodos = await db.select().from(todos).where(eq(todos.userId, user.id));
+    return { todos: fetchedTodos };
 }
 
 export const actions = {
-    insertTodo: async ({ request, locals: { supabase, user }}) => {
+    insertTodo: async ({ request, locals: { db, user }}) => {
         const formData = await request.formData();
         const name = formData.get("name") as string;
 
@@ -19,22 +20,19 @@ export const actions = {
             return fail(403, { message: "User is not authenticated" });
         }
 
-        const { error } = await supabase.from("todos").insert({ name, user_id: user.id });
-        if (error) throw error;
+        await db.insert(todos).values({ name, userId: user.id });
     },
-    updateTodo: async ({ request, locals: { supabase }}) => {
+    updateTodo: async ({ request, locals: { db }}) => {
         const formData = await request.formData();
         const name = formData.get("name") as string;
         const todoId = formData.get("todoId") as string;
 
-        const { error } = await supabase.from("todos").update({ name }).eq("id", todoId);
-        if (error) throw error;
+        await db.update(todos).set({ name }).where(eq(todos.id, todoId));
     },
-    deleteTodo: async ({ request, locals: { supabase }}) => {
+    deleteTodo: async ({ request, locals: { db }}) => {
         const formData = await request.formData();
         const todoId = formData.get("todoId") as string;
 
-        const { error } = await supabase.from("todos").delete().eq("id", todoId);
-        if (error) throw error;
+        await db.delete(todos).where(eq(todos.id, todoId));
     }
 }
