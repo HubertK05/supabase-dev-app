@@ -6,11 +6,21 @@
 
 <div class="app">
 	<header>
-		{#if data.user}
-			Logged in as: {data.user.email} ({data.user.id})
-		{:else}
-			Not logged in
-		{/if}
+		<div class="flex">
+			{#if data.user}
+				<span>Logged in as: {data.user.email} ({data.user.id})</span>
+				<form
+					class="header-not-first"
+					method="POST"
+					action="/auth/logout"
+				>
+					<button type="submit">Logout</button>
+				</form>
+			{:else}
+				<span>Not logged in</span>
+				<a class="header-not-first" href="/auth/login">Login</a>
+			{/if}
+		</div>
 	</header>
 
 	<main>
@@ -19,6 +29,15 @@
 </div>
 
 <style>
+	.flex {
+		display: flex;
+		align-items: center;
+	}
+
+	.header-not-first {
+		margin-left: 0.5rem;
+	}
+
 	header {
 		padding: 1rem;
 	}
