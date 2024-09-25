@@ -1,9 +1,12 @@
 import { fail } from "@sveltejs/kit";
 
-export const load = async ({ locals: { supabase }}) => {
-    const { data: users, error } = await supabase.from("users").select(`id, email, todos ( id, name )`)
+export const load = async ({ locals: { supabase, user }}) => {
+    if (!user) {
+        throw Error("User is not authenticated");
+    }
+
+    const { data: users, error } = await supabase.from("users").select(`id, email, todos ( id, name )`).eq("id", user.id);
     if (error) throw error;
-    console.log(users);
     return { users };
 }
 
