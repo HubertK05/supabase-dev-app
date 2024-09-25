@@ -2,9 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { redirect, type Handle } from '@sveltejs/kit'
 
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
+import { DATABASE_URL } from '$env/static/private'
 import { sequence } from '@sveltejs/kit/hooks'
+import postgres from 'postgres'
+import { drizzle } from 'drizzle-orm/postgres-js'
 
 const supabase: Handle = async ({ event, resolve }) => {
+  const pg = postgres(DATABASE_URL);
+  event.locals.db = drizzle(pg);
+
   event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
     cookies: {
       getAll: () => event.cookies.getAll(),
