@@ -6,14 +6,14 @@
 
 <div class="app">
 	<header>
-		<div class="flex">
+		<div>
+			<a href="/">Home</a>
+			<a href="/todos">Todos</a>
+		</div>
+		<div class="login-status">
 			{#if data.user}
 				<span>Logged in as: {data.user.email} ({data.user.id})</span>
-				<form
-					class="header-not-first"
-					method="POST"
-					action="/auth/logout"
-				>
+				<form method="POST" action="/auth/logout">
 					<button type="submit">Logout</button>
 				</form>
 			{:else}
@@ -29,17 +29,20 @@
 </div>
 
 <style>
-	.flex {
+	header {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
+		padding: 1rem;
 	}
 
-	.header-not-first {
+	header :not(:first-child) {
 		margin-left: 0.5rem;
 	}
 
-	header {
-		padding: 1rem;
+	.login-status {
+		display: flex;
+		align-items: center;
 	}
 
 	.app {

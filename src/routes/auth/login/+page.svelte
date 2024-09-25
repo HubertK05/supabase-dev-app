@@ -17,6 +17,8 @@
 	<button type="submit">Login with GitHub</button>
 </form>
 
+<a href="/auth/register">No account? Register here</a>
+
 {#if form?.message}
 	{form.message}
 {/if}

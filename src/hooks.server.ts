@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
-import { type Handle } from '@sveltejs/kit'
+import { redirect, type Handle } from '@sveltejs/kit'
 
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public'
+import { sequence } from '@sveltejs/kit/hooks'
 
 const supabase: Handle = async ({ event, resolve }) => {
   event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
@@ -41,4 +42,16 @@ const supabase: Handle = async ({ event, resolve }) => {
   })
 }
 
-export const handle: Handle = supabase
+const authGuard: Handle = async ({ event, resolve }) => {
+  const { session, user } = await event.locals.safeGetSession()
+  event.locals.session = session
+  event.locals.user = user
+
+  if (!event.locals.session && ["/todos"].includes(event.url.pathname)) {
+    redirect(303, '/login')
+  }
+
+  return resolve(event)
+}
+
+export const handle: Handle = sequence(supabase, authGuard);
